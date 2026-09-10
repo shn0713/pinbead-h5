@@ -75,7 +75,8 @@ const els = {
   shareImageButton: document.querySelector("#shareImageButton"),
   viewImageLink: document.querySelector("#viewImageLink"),
   savePreviewImage: document.querySelector("#savePreviewImage"),
-  saveImageLink: document.querySelector("#saveImageLink"),
+  downloadFullImageButton: document.querySelector("#downloadFullImageButton"),
+  saveStatus: document.querySelector("#saveStatus"),
   zoomSheet: document.querySelector("#zoomSheet"),
   zoomBackdrop: document.querySelector("#zoomBackdrop"),
   closeZoomButton: document.querySelector("#closeZoomButton"),
@@ -401,34 +402,57 @@ function downloadBlob(blob, fileName) {
   setTimeout(() => URL.revokeObjectURL(url), 500);
 }
 
+function canvasToPngBlob(canvas) {
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+}
+
 function openSaveSheet() {
   const dataUrl = els.gridCanvas.toDataURL("image/png");
-  const fileName = `${state.sourceName}-拼豆图纸.png`;
   els.savePreviewImage.src = dataUrl;
-  els.saveImageLink.href = dataUrl;
   els.viewImageLink.href = dataUrl;
-  els.saveImageLink.download = fileName;
+  els.saveStatus.textContent = "图纸已生成完整 PNG，包含全部格子和色号。";
   els.saveSheet.hidden = false;
   document.body.classList.add("modal-open");
 }
 
+async function downloadFullPng() {
+  els.saveStatus.textContent = "正在准备完整图片…";
+  const blob = await canvasToPngBlob(els.gridCanvas);
+  if (!blob) {
+    els.saveStatus.textContent = "图片生成失败，请改用“新页面打开”后长按保存。";
+    return;
+  }
+  downloadBlob(blob, `${state.sourceName}-拼豆图纸.png`);
+  els.saveStatus.textContent = "已发起下载；如果手机没有反应，请点“手机分享 / 保存图片”。";
+}
+
 async function shareImage() {
   const fileName = `${state.sourceName}-拼豆图纸.png`;
-  const blob = await new Promise((resolve) => els.gridCanvas.toBlob(resolve, "image/png"));
+  els.saveStatus.textContent = "正在打开手机保存选项…";
+  const blob = await canvasToPngBlob(els.gridCanvas);
   if (blob && navigator.share) {
     const file = new File([blob], fileName, { type: "image/png" });
     const canShareFiles = !navigator.canShare || navigator.canShare({ files: [file] });
     if (canShareFiles) {
       try {
         await navigator.share({ title: "拼豆图纸", text: "这是我的拼豆图纸", files: [file] });
+        els.saveStatus.textContent = "已打开手机分享面板，可以选择保存到相册或文件。";
         return;
       } catch (error) {
-        if (error && error.name === "AbortError") return;
+        if (error && error.name === "AbortError") {
+          els.saveStatus.textContent = "已取消分享。";
+          return;
+        }
       }
     }
   }
   const popup = window.open(els.savePreviewImage.src, "_blank", "noopener");
-  if (!popup) els.viewImageLink.focus();
+  if (!popup) {
+    els.viewImageLink.focus();
+    els.saveStatus.textContent = "当前浏览器拦截了新页面，请点“新页面打开”，再长按完整图片保存。";
+  } else {
+    els.saveStatus.textContent = "已打开完整图片，请长按图片保存到手机。";
+  }
 }
 
 function closeSaveSheet() {
@@ -579,6 +603,7 @@ els.generateButton.addEventListener("click", generate);
 els.sizeSelect.addEventListener("change", generate);
 els.paletteSelect.addEventListener("change", generate);
 els.downloadPngButton.addEventListener("click", openSaveSheet);
+els.downloadFullImageButton.addEventListener("click", downloadFullPng);
 els.downloadCsvButton.addEventListener("click", downloadCsv);
 els.printButton.addEventListener("click", printPages);
 els.magnifyButton.addEventListener("click", () => openZoomSheet());
