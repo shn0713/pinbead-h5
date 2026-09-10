@@ -101,6 +101,7 @@ function createEmptyGrid(width, height, fillIndex = 0) {
 function createSampleGrid(size) {
   state.gridWidth = size;
   state.gridHeight = size;
+  const designSize = 52;
   const bg = findColorIndex("H1");
   const dark = findColorIndex("H7");
   const gray = findColorIndex("H4");
@@ -110,17 +111,17 @@ function createSampleGrid(size) {
   const green = findColorIndex("B8");
   const mint = findColorIndex("B3");
   const blue = findColorIndex("C5");
-  const grid = createEmptyGrid(size, size, bg);
-  const center = size / 2;
+  const grid = createEmptyGrid(designSize, designSize, bg);
+  const center = designSize / 2;
 
   const paint = (x, y, color) => {
-    if (x >= 0 && x < size && y >= 0 && y < size) grid[y][x] = color;
+    if (x >= 0 && x < designSize && y >= 0 && y < designSize) grid[y][x] = color;
   };
 
   // A small pixel-art cat with a plant and a sun, so the initial state is meaningful.
   for (let y = 5; y < 15; y += 1) {
-    for (let x = size - 14; x < size - 4; x += 1) {
-      if ((x - (size - 9)) ** 2 + (y - 10) ** 2 < 33) paint(x, y, yellow);
+    for (let x = designSize - 14; x < designSize - 4; x += 1) {
+      if ((x - (designSize - 9)) ** 2 + (y - 10) ** 2 < 33) paint(x, y, yellow);
     }
   }
 
@@ -144,23 +145,30 @@ function createSampleGrid(size) {
   paint(catLeft + 5, 23, gray); paint(catLeft + 4, 23, gray);
   paint(catRight - 5, 23, gray); paint(catRight - 4, 23, gray);
 
-  for (let y = 27; y < Math.min(size - 8, 38); y += 1) {
+  for (let y = 27; y < Math.min(designSize - 8, 38); y += 1) {
     paint(Math.round(center), y, green);
     if (y > 30) { paint(Math.round(center) - 1, y, green); paint(Math.round(center) + 1, y, green); }
   }
-  for (let y = 29; y < Math.min(size - 8, 38); y += 1) {
+  for (let y = 29; y < Math.min(designSize - 8, 38); y += 1) {
     const spread = Math.floor((y - 27) / 2) + 2;
     for (let x = Math.round(center) - spread; x <= Math.round(center) + spread; x += 1) {
       if ((x + y) % 3 === 0) paint(x, y, mint);
     }
   }
 
-  const baseY = Math.min(size - 5, 42);
+  const baseY = Math.min(designSize - 5, 42);
   for (let x = Math.round(center) - 14; x <= Math.round(center) + 14; x += 1) {
     paint(x, baseY, blue);
     if (Math.abs(x - center) < 12) paint(x, baseY - 1, blue);
   }
-  return grid;
+  if (size === designSize) return grid;
+  return Array.from({ length: size }, (_, y) => {
+    const sourceY = Math.min(designSize - 1, Math.floor((y + 0.5) * designSize / size));
+    return Array.from({ length: size }, (_, x) => {
+      const sourceX = Math.min(designSize - 1, Math.floor((x + 0.5) * designSize / size));
+      return grid[sourceY][sourceX];
+    });
+  });
 }
 
 function convertImageToGrid(image) {
