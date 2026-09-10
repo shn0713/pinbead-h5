@@ -36,7 +36,10 @@ const state = {
   grid: [],
   gridWidth: 52,
   gridHeight: 52,
-  counts: new Map()
+  counts: new Map(),
+  zoomCenterX: 0,
+  zoomCenterY: 0,
+  zoomRange: 13
 };
 
 const els = {
@@ -52,6 +55,7 @@ const els = {
   sizeSelect: document.querySelector("#sizeSelect"),
   paletteSelect: document.querySelector("#paletteSelect"),
   generateButton: document.querySelector("#generateButton"),
+  canvasFrame: document.querySelector("#canvasFrame"),
   resultName: document.querySelector("#resultName"),
   resultMeta: document.querySelector("#resultMeta"),
   gridCanvas: document.querySelector("#gridCanvas"),
@@ -63,6 +67,7 @@ const els = {
   downloadPngButton: document.querySelector("#downloadPngButton"),
   downloadCsvButton: document.querySelector("#downloadCsvButton"),
   printButton: document.querySelector("#printButton"),
+  magnifyButton: document.querySelector("#magnifyButton"),
   saveSheet: document.querySelector("#saveSheet"),
   saveBackdrop: document.querySelector("#saveBackdrop"),
   closeSaveButton: document.querySelector("#closeSaveButton"),
@@ -70,7 +75,16 @@ const els = {
   shareImageButton: document.querySelector("#shareImageButton"),
   viewImageLink: document.querySelector("#viewImageLink"),
   savePreviewImage: document.querySelector("#savePreviewImage"),
-  saveImageLink: document.querySelector("#saveImageLink")
+  saveImageLink: document.querySelector("#saveImageLink"),
+  zoomSheet: document.querySelector("#zoomSheet"),
+  zoomBackdrop: document.querySelector("#zoomBackdrop"),
+  closeZoomButton: document.querySelector("#closeZoomButton"),
+  closeZoomButtonSecondary: document.querySelector("#closeZoomButtonSecondary"),
+  zoomRangeSelect: document.querySelector("#zoomRangeSelect"),
+  zoomInfo: document.querySelector("#zoomInfo"),
+  zoomCanvas: document.querySelector("#zoomCanvas"),
+  downloadZoomButton: document.querySelector("#downloadZoomButton"),
+  printSheet: document.querySelector("#printSheet")
 };
 
 function hexToRgb(hex) {
@@ -265,6 +279,31 @@ function calculateCounts() {
   state.grid.flat().forEach((index) => state.counts.set(index, (state.counts.get(index) || 0) + 1));
 }
 
+function drawGridCells(context, grid, startX, startY, width, height, cellSize, showCodes = true) {
+  const codeFontSize = cellSize >= 24 ? (state.gridWidth >= 104 ? 5 : state.gridWidth >= 78 ? 6 : 7) : Math.max(8, Math.floor(cellSize / 3.3));
+  context.font = `700 ${codeFontSize}px Arial, sans-serif`;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.lineWidth = cellSize >= 20 ? 0.7 : 0.9;
+
+  for (let y = startY; y < Math.min(startY + height, grid.length); y += 1) {
+    for (let x = startX; x < Math.min(startX + width, grid[y].length); x += 1) {
+      const color = state.palette[grid[y][x]] || state.palette[0];
+      const drawX = (x - startX) * cellSize;
+      const drawY = (y - startY) * cellSize;
+      context.fillStyle = color.hex;
+      context.fillRect(drawX, drawY, cellSize, cellSize);
+      context.strokeStyle = "rgba(35, 50, 41, 0.2)";
+      context.strokeRect(drawX + 0.25, drawY + 0.25, cellSize - 0.5, cellSize - 0.5);
+      if (showCodes) {
+        const luminance = color.rgb.r * 0.299 + color.rgb.g * 0.587 + color.rgb.b * 0.114;
+        context.fillStyle = luminance < 145 ? "rgba(255,255,255,0.92)" : "rgba(28,36,32,0.78)";
+        context.fillText(color.code, drawX + cellSize / 2, drawY + cellSize / 2 + 0.5);
+      }
+    }
+  }
+}
+
 function drawGrid() {
   const canvas = els.gridCanvas;
   const context = canvas.getContext("2d");
@@ -272,26 +311,7 @@ function drawGrid() {
   canvas.width = state.gridWidth * cellSize;
   canvas.height = state.gridHeight * cellSize;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  const codeFontSize = state.gridWidth >= 104 ? 5 : state.gridWidth >= 78 ? 6 : 7;
-  context.font = `700 ${codeFontSize}px Arial, sans-serif`;
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-
-  for (let y = 0; y < state.gridHeight; y += 1) {
-    for (let x = 0; x < state.gridWidth; x += 1) {
-      const color = state.palette[state.grid[y][x]] || state.palette[0];
-      context.fillStyle = color.hex;
-      context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-      context.strokeStyle = "rgba(35, 50, 41, 0.16)";
-      context.lineWidth = 0.7;
-      context.strokeRect(x * cellSize + 0.25, y * cellSize + 0.25, cellSize - 0.5, cellSize - 0.5);
-      if (state.gridWidth <= 104 && state.gridHeight <= 104) {
-        const luminance = color.rgb.r * 0.299 + color.rgb.g * 0.587 + color.rgb.b * 0.114;
-        context.fillStyle = luminance < 145 ? "rgba(255,255,255,0.88)" : "rgba(28,36,32,0.72)";
-        context.fillText(color.code, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2 + 0.5);
-      }
-    }
-  }
+  drawGridCells(context, state.grid, 0, 0, state.gridWidth, state.gridHeight, cellSize);
 }
 
 function renderLegend() {
@@ -315,6 +335,8 @@ function renderSummary() {
 
 function renderAll() {
   calculateCounts();
+  state.zoomCenterX = Math.min(state.gridWidth - 1, Math.max(0, state.zoomCenterX || Math.floor(state.gridWidth / 2)));
+  state.zoomCenterY = Math.min(state.gridHeight - 1, Math.max(0, state.zoomCenterY || Math.floor(state.gridHeight / 2)));
   drawGrid();
   renderLegend();
   renderSummary();
@@ -333,6 +355,8 @@ function resetToSample() {
   els.sourcePreviewWrap.hidden = true;
   state.palette = getPalette(state.paletteCount);
   state.grid = createSampleGrid(state.size);
+  state.zoomCenterX = Math.floor(state.gridWidth / 2);
+  state.zoomCenterY = Math.floor(state.gridHeight / 2);
   renderAll();
 }
 
@@ -361,6 +385,8 @@ function generate() {
   state.paletteCount = Number(els.paletteSelect.value);
   state.palette = getPalette(state.paletteCount);
   state.grid = state.sourceImage && !state.isSample ? convertImageToGrid(state.sourceImage) : createSampleGrid(state.size);
+  state.zoomCenterX = Math.floor(state.gridWidth / 2);
+  state.zoomCenterY = Math.floor(state.gridHeight / 2);
   renderAll();
 }
 
@@ -424,6 +450,129 @@ function downloadCsv() {
   downloadBlob(new Blob(["\ufeff" + rows.join("\n")], { type: "text/csv;charset=utf-8" }), `${state.sourceName}-颜色清单.csv`);
 }
 
+function drawZoomPreview() {
+  const range = Math.min(state.zoomRange, state.gridWidth, state.gridHeight);
+  const half = Math.floor(range / 2);
+  const startX = Math.max(0, Math.min(state.gridWidth - range, state.zoomCenterX - half));
+  const startY = Math.max(0, Math.min(state.gridHeight - range, state.zoomCenterY - half));
+  const cellSize = 42;
+  const canvas = els.zoomCanvas;
+  const context = canvas.getContext("2d");
+  canvas.width = range * cellSize;
+  canvas.height = range * cellSize;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  drawGridCells(context, state.grid, startX, startY, range, range, cellSize);
+  els.zoomInfo.textContent = `第 ${startY + 1}–${startY + range} 行 · 第 ${startX + 1}–${startX + range} 列`;
+}
+
+function openZoomSheet(x = state.zoomCenterX, y = state.zoomCenterY) {
+  state.zoomCenterX = Math.min(state.gridWidth - 1, Math.max(0, x));
+  state.zoomCenterY = Math.min(state.gridHeight - 1, Math.max(0, y));
+  drawZoomPreview();
+  els.zoomSheet.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeZoomSheet() {
+  els.zoomSheet.hidden = true;
+  els.zoomCanvas.width = 1;
+  els.zoomCanvas.height = 1;
+  if (els.saveSheet.hidden) document.body.classList.remove("modal-open");
+}
+
+function selectGridPoint(event) {
+  const rect = els.gridCanvas.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const x = Math.floor((event.clientX - rect.left) / (rect.width / state.gridWidth));
+  const y = Math.floor((event.clientY - rect.top) / (rect.height / state.gridHeight));
+  if (x >= 0 && x < state.gridWidth && y >= 0 && y < state.gridHeight) openZoomSheet(x, y);
+}
+
+function downloadZoomPng() {
+  els.zoomCanvas.toBlob((blob) => {
+    if (blob) downloadBlob(blob, `${state.sourceName}-局部放大.png`);
+  }, "image/png");
+}
+
+function createPrintPage(title, subtitle, canvas) {
+  const page = document.createElement("section");
+  page.className = "print-page";
+  const heading = document.createElement("div");
+  heading.className = "print-page-heading";
+  const titleElement = document.createElement("h1");
+  titleElement.textContent = title;
+  const subtitleElement = document.createElement("p");
+  subtitleElement.textContent = subtitle;
+  heading.append(titleElement, subtitleElement);
+  page.append(heading, canvas);
+  return page;
+}
+
+function buildPrintSheet() {
+  els.printSheet.replaceChildren();
+  const chunkWidth = 26;
+  const chunkHeight = 26;
+  const cellSize = 24;
+  let pageNumber = 0;
+
+  for (let startY = 0; startY < state.gridHeight; startY += chunkHeight) {
+    for (let startX = 0; startX < state.gridWidth; startX += chunkWidth) {
+      const width = Math.min(chunkWidth, state.gridWidth - startX);
+      const height = Math.min(chunkHeight, state.gridHeight - startY);
+      const canvas = document.createElement("canvas");
+      canvas.className = "print-grid-canvas";
+      canvas.width = width * cellSize;
+      canvas.height = height * cellSize;
+      drawGridCells(canvas.getContext("2d"), state.grid, startX, startY, width, height, cellSize);
+      pageNumber += 1;
+      const subtitle = `${state.gridWidth} × ${state.gridHeight} 格 · 第 ${startY + 1}–${startY + height} 行 / 第 ${startX + 1}–${startX + width} 列 · ${state.paletteCount} 色`;
+      els.printSheet.append(createPrintPage(`${state.sourceName} · 拼豆图纸`, subtitle, canvas));
+    }
+  }
+
+  const sorted = [...state.counts.entries()].sort((a, b) => b[1] - a[1]);
+  const legendChunkSize = 60;
+  for (let offset = 0; offset < sorted.length; offset += legendChunkSize) {
+    const page = document.createElement("section");
+    page.className = "print-page print-legend-page";
+    const heading = document.createElement("div");
+    heading.className = "print-page-heading";
+    const title = document.createElement("h1");
+    title.textContent = `${state.sourceName} · 颜色清单`;
+    const subtitle = document.createElement("p");
+    subtitle.textContent = `${state.gridWidth} × ${state.gridHeight} 格 · 共 ${state.counts.size} 种颜色`;
+    heading.append(title, subtitle);
+    const list = document.createElement("div");
+    list.className = "print-color-list";
+    sorted.slice(offset, offset + legendChunkSize).forEach(([index, count]) => {
+      const color = state.palette[index];
+      const item = document.createElement("div");
+      item.className = "print-color-item";
+      const swatch = document.createElement("span");
+      swatch.className = "legend-swatch";
+      swatch.style.background = color.hex;
+      const text = document.createElement("span");
+      text.textContent = `${color.code} · ${count}颗`;
+      item.append(swatch, text);
+      list.append(item);
+    });
+    page.append(heading, list);
+    els.printSheet.append(page);
+  }
+  els.printSheet.setAttribute("aria-label", `共 ${pageNumber} 页图纸和颜色清单`);
+}
+
+function printPages() {
+  buildPrintSheet();
+  document.body.classList.add("printing-pages");
+  window.setTimeout(() => window.print(), 80);
+}
+
+function clearPrintMode() {
+  document.body.classList.remove("printing-pages");
+  els.printSheet.replaceChildren();
+}
+
 els.imageInput.addEventListener("change", (event) => showImage(event.target.files[0]));
 els.useSampleButton.addEventListener("click", resetToSample);
 els.generateButton.addEventListener("click", generate);
@@ -431,14 +580,26 @@ els.sizeSelect.addEventListener("change", generate);
 els.paletteSelect.addEventListener("change", generate);
 els.downloadPngButton.addEventListener("click", openSaveSheet);
 els.downloadCsvButton.addEventListener("click", downloadCsv);
-els.printButton.addEventListener("click", () => window.print());
+els.printButton.addEventListener("click", printPages);
+els.magnifyButton.addEventListener("click", () => openZoomSheet());
+els.gridCanvas.addEventListener("click", selectGridPoint);
+els.zoomRangeSelect.addEventListener("change", (event) => {
+  state.zoomRange = Number(event.target.value);
+  drawZoomPreview();
+});
+els.downloadZoomButton.addEventListener("click", downloadZoomPng);
+els.closeZoomButton.addEventListener("click", closeZoomSheet);
+els.closeZoomButtonSecondary.addEventListener("click", closeZoomSheet);
+els.zoomBackdrop.addEventListener("click", closeZoomSheet);
 els.closeSaveButton.addEventListener("click", closeSaveSheet);
 els.closeSaveButtonSecondary.addEventListener("click", closeSaveSheet);
 els.shareImageButton.addEventListener("click", shareImage);
 els.saveBackdrop.addEventListener("click", closeSaveSheet);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !els.saveSheet.hidden) closeSaveSheet();
+  if (event.key === "Escape" && !els.zoomSheet.hidden) closeZoomSheet();
 });
+window.addEventListener("afterprint", clearPrintMode);
 
 ["dragenter", "dragover"].forEach((eventName) => els.dropzone.addEventListener(eventName, (event) => {
   event.preventDefault();
@@ -452,4 +613,6 @@ els.dropzone.addEventListener("drop", (event) => showImage(event.dataTransfer.fi
 
 state.palette = getPalette(state.paletteCount);
 state.grid = createSampleGrid(state.size);
+state.zoomCenterX = Math.floor(state.gridWidth / 2);
+state.zoomCenterY = Math.floor(state.gridHeight / 2);
 renderAll();
