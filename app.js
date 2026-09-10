@@ -67,7 +67,7 @@ const els = {
   downloadPngButton: document.querySelector("#downloadPngButton"),
   downloadCsvButton: document.querySelector("#downloadCsvButton"),
   printButton: document.querySelector("#printButton"),
-  magnifyButton: document.querySelector("#magnifyButton"),
+  downloadFullImageCanvasButton: document.querySelector("#downloadFullImageCanvasButton"),
   saveSheet: document.querySelector("#saveSheet"),
   saveBackdrop: document.querySelector("#saveBackdrop"),
   closeSaveButton: document.querySelector("#closeSaveButton"),
@@ -415,15 +415,20 @@ function openSaveSheet() {
   document.body.classList.add("modal-open");
 }
 
-async function downloadFullPng() {
-  els.saveStatus.textContent = "正在准备完整图片…";
+async function downloadFullPng(triggerButton = els.downloadFullImageButton) {
+  const originalButtonHtml = triggerButton ? triggerButton.innerHTML : "";
+  if (!els.saveSheet.hidden) els.saveStatus.textContent = "正在准备完整图片…";
   const blob = await canvasToPngBlob(els.gridCanvas);
   if (!blob) {
-    els.saveStatus.textContent = "图片生成失败，请改用“新页面打开”后长按保存。";
+    if (!els.saveSheet.hidden) els.saveStatus.textContent = "图片生成失败，请改用“新页面打开”后长按保存。";
     return;
   }
   downloadBlob(blob, `${state.sourceName}-拼豆图纸.png`);
-  els.saveStatus.textContent = "已发起下载；如果手机没有反应，请点“手机分享 / 保存图片”。";
+  if (!els.saveSheet.hidden) els.saveStatus.textContent = "已发起下载；如果手机没有反应，请点“手机分享 / 保存图片”。";
+  if (triggerButton) {
+    triggerButton.textContent = "已开始下载 ✓";
+    window.setTimeout(() => { triggerButton.innerHTML = originalButtonHtml; }, 1800);
+  }
 }
 
 async function shareImage() {
@@ -606,8 +611,7 @@ els.downloadPngButton.addEventListener("click", openSaveSheet);
 els.downloadFullImageButton.addEventListener("click", downloadFullPng);
 els.downloadCsvButton.addEventListener("click", downloadCsv);
 els.printButton.addEventListener("click", printPages);
-els.magnifyButton.addEventListener("click", () => openZoomSheet());
-els.gridCanvas.addEventListener("click", selectGridPoint);
+els.downloadFullImageCanvasButton.addEventListener("click", () => downloadFullPng(els.downloadFullImageCanvasButton));
 els.zoomRangeSelect.addEventListener("change", (event) => {
   state.zoomRange = Number(event.target.value);
   drawZoomPreview();
