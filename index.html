@@ -159,12 +159,14 @@
           <button class="save-close" id="closeSaveButton" type="button" aria-label="关闭保存预览">×</button>
           <span class="section-kicker">保存图纸</span>
           <h2 id="saveTitle">长按图片保存</h2>
-          <p>如果直接下载没有反应，请长按下面的大图，选择“保存图片”。</p>
+          <p>优先点击“直接保存 PNG”。如果没有反应，可以使用“分享 / 保存图片”，或打开新页面后长按大图保存。</p>
           <div class="save-image-frame">
             <img id="savePreviewImage" alt="可保存的拼豆图纸大图" />
           </div>
           <div class="save-actions">
             <a class="primary-button save-link" id="saveImageLink" href="#" download="拼豆图纸.png">直接保存 PNG <span class="button-arrow">↓</span></a>
+            <button class="secondary-button" id="shareImageButton" type="button">分享 / 保存图片</button>
+            <a class="secondary-button view-link" id="viewImageLink" href="#" target="_blank" rel="noopener">新页面打开</a>
             <button class="secondary-button" id="closeSaveButtonSecondary" type="button">返回图纸</button>
           </div>
         </section>
