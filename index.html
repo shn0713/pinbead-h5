@@ -162,16 +162,17 @@
           <button class="save-close" id="closeSaveButton" type="button" aria-label="关闭保存预览">×</button>
           <span class="section-kicker">保存图纸</span>
           <h2 id="saveTitle">长按图片保存</h2>
-          <p>优先点击“直接保存 PNG”。如果没有反应，可以使用“分享 / 保存图片”，或打开新页面后长按大图保存。</p>
+          <p>这张是完整尺寸图纸，不是手机截图。普通浏览器点击下载即可；如果在微信等内置浏览器中没有反应，请使用“手机分享 / 保存图片”，或打开新页面后长按大图保存。</p>
           <div class="save-image-frame">
             <img id="savePreviewImage" alt="可保存的拼豆图纸大图" />
           </div>
           <div class="save-actions">
-            <a class="primary-button save-link" id="saveImageLink" href="#" download="拼豆图纸.png">直接保存 PNG <span class="button-arrow">↓</span></a>
-            <button class="secondary-button" id="shareImageButton" type="button">分享 / 保存图片</button>
+            <button class="primary-button save-link" id="downloadFullImageButton" type="button">下载完整 PNG <span class="button-arrow">↓</span></button>
+            <button class="secondary-button" id="shareImageButton" type="button">手机分享 / 保存图片</button>
             <a class="secondary-button view-link" id="viewImageLink" href="#" target="_blank" rel="noopener">新页面打开</a>
             <button class="secondary-button" id="closeSaveButtonSecondary" type="button">返回图纸</button>
           </div>
+          <p class="save-status" id="saveStatus" aria-live="polite"></p>
         </section>
       </div>
 
