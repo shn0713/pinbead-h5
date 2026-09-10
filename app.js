@@ -406,6 +406,22 @@ function canvasToPngBlob(canvas) {
   return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 }
 
+function saveImageInAndroidApp(fileName) {
+  if (!window.AndroidBridge || typeof window.AndroidBridge.saveImage !== "function") return false;
+  try {
+    const result = window.AndroidBridge.saveImage(els.gridCanvas.toDataURL("image/png"), fileName);
+    if (result === "permission_required") {
+      if (!els.saveSheet.hidden) els.saveStatus.textContent = "请先允许照片/存储权限，再点击一次下载。";
+    } else if (!els.saveSheet.hidden) {
+      els.saveStatus.textContent = "已保存到手机相册的“拼豆图纸”文件夹。";
+    }
+    return true;
+  } catch (error) {
+    console.warn("Android 相册保存不可用，改用浏览器下载。", error);
+    return false;
+  }
+}
+
 function openSaveSheet() {
   const dataUrl = els.gridCanvas.toDataURL("image/png");
   els.savePreviewImage.src = dataUrl;
@@ -417,13 +433,21 @@ function openSaveSheet() {
 
 async function downloadFullPng(triggerButton = els.downloadFullImageButton) {
   const originalButtonHtml = triggerButton ? triggerButton.innerHTML : "";
+  const fileName = `${state.sourceName}-拼豆图纸.png`;
+  if (saveImageInAndroidApp(fileName)) {
+    if (triggerButton) {
+      triggerButton.textContent = "已保存到相册 ✓";
+      window.setTimeout(() => { triggerButton.innerHTML = originalButtonHtml; }, 1800);
+    }
+    return;
+  }
   if (!els.saveSheet.hidden) els.saveStatus.textContent = "正在准备完整图片…";
   const blob = await canvasToPngBlob(els.gridCanvas);
   if (!blob) {
     if (!els.saveSheet.hidden) els.saveStatus.textContent = "图片生成失败，请改用“新页面打开”后长按保存。";
     return;
   }
-  downloadBlob(blob, `${state.sourceName}-拼豆图纸.png`);
+  downloadBlob(blob, fileName);
   if (!els.saveSheet.hidden) els.saveStatus.textContent = "已发起下载；如果手机没有反应，请点“手机分享 / 保存图片”。";
   if (triggerButton) {
     triggerButton.textContent = "已开始下载 ✓";
