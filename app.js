@@ -1,29 +1,4 @@
-const PALETTE = [
-  { code: "H1", name: "云朵白", hex: "#f7f5eb" },
-  { code: "H2", name: "奶油色", hex: "#f0dfbd" },
-  { code: "H3", name: "沙棕色", hex: "#c99763" },
-  { code: "H4", name: "柠檬黄", hex: "#f3c64f" },
-  { code: "H5", name: "暖橙色", hex: "#e8894f" },
-  { code: "H6", name: "珊瑚红", hex: "#d95d55" },
-  { code: "H7", name: "砖红色", hex: "#a94342" },
-  { code: "H8", name: "樱花粉", hex: "#e7a4ac" },
-  { code: "H9", name: "葡萄紫", hex: "#8d6592" },
-  { code: "H10", name: "宝石蓝", hex: "#365e9e" },
-  { code: "H11", name: "天空蓝", hex: "#72afd0" },
-  { code: "H12", name: "湖水青", hex: "#4b9e9a" },
-  { code: "H13", name: "豆绿色", hex: "#75ad75" },
-  { code: "H14", name: "深绿", hex: "#3f7353" },
-  { code: "H15", name: "巧克力棕", hex: "#714d3d" },
-  { code: "H16", name: "暖灰色", hex: "#a7aaa2" },
-  { code: "H17", name: "石墨灰", hex: "#5b625e" },
-  { code: "H18", name: "墨黑色", hex: "#272c2b" },
-  { code: "H19", name: "雾蓝灰", hex: "#8494a2" },
-  { code: "H20", name: "西柚粉", hex: "#dc7b78" },
-  { code: "H21", name: "薄荷绿", hex: "#abd3b4" },
-  { code: "H22", name: "午夜蓝", hex: "#293c65" },
-  { code: "H23", name: "雾霾紫", hex: "#b0a3c7" },
-  { code: "H24", name: "燕麦色", hex: "#ddd0b7" }
-];
+const PALETTE = (window.MARD_COLOR_DATA || []).map(([code, name, hex]) => ({ code, name, hex }));
 
 const state = {
   sourceImage: null,
@@ -87,49 +62,13 @@ function hexToRgb(hex) {
 
 PALETTE.forEach((color) => { color.rgb = hexToRgb(color.hex); });
 
-function hslToHex(hue, saturation, lightness) {
-  const s = saturation / 100;
-  const l = lightness / 100;
-  const chroma = (1 - Math.abs(2 * l - 1)) * s;
-  const segment = hue / 60;
-  const x = chroma * (1 - Math.abs((segment % 2) - 1));
-  const match = l - chroma / 2;
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  if (segment < 1) [r, g, b] = [chroma, x, 0];
-  else if (segment < 2) [r, g, b] = [x, chroma, 0];
-  else if (segment < 3) [r, g, b] = [0, chroma, x];
-  else if (segment < 4) [r, g, b] = [0, x, chroma];
-  else if (segment < 5) [r, g, b] = [x, 0, chroma];
-  else [r, g, b] = [chroma, 0, x];
-  return `#${[r, g, b].map((value) => Math.round((value + match) * 255).toString(16).padStart(2, "0")).join("")}`;
-}
-
-function buildFullPalette() {
-  const fullPalette = PALETTE.slice();
-  const additionalColors = 221 - fullPalette.length;
-  for (let index = 0; index < additionalColors; index += 1) {
-    const hue = (index * 137.508) % 360;
-    const saturation = 42 + ((index * 17) % 37);
-    const lightness = 30 + ((index * 29) % 43);
-    const hex = hslToHex(hue, saturation, lightness);
-    const code = `H${String(fullPalette.length + 1).padStart(3, "0")}`;
-    fullPalette.push({ code, name: `扩展色 ${fullPalette.length + 1}`, hex, rgb: hexToRgb(hex) });
-  }
-  return fullPalette;
-}
-
-const FULL_PALETTE = buildFullPalette();
+const PALETTE_BY_CODE = new Map(PALETTE.map((color) => [color.code, color]));
 
 function getPalette(count) {
-  if (count >= PALETTE.length) return FULL_PALETTE.slice(0, count);
-  const selected = [];
-  for (let i = 0; i < count; i += 1) {
-    const index = Math.round(i * (PALETTE.length - 1) / (count - 1));
-    selected.push(PALETTE[index]);
-  }
-  return selected;
+  const paletteSets = window.MARD_PALETTE_SETS || {};
+  const codes = paletteSets[count] || paletteSets[221] || [];
+  const selected = codes.map((code) => PALETTE_BY_CODE.get(code)).filter(Boolean);
+  return selected.length ? selected : PALETTE.slice(0, Math.min(count, PALETTE.length));
 }
 
 function nearestColorIndex(rgb, palette = state.palette) {
