@@ -67,6 +67,8 @@ const els = {
   saveBackdrop: document.querySelector("#saveBackdrop"),
   closeSaveButton: document.querySelector("#closeSaveButton"),
   closeSaveButtonSecondary: document.querySelector("#closeSaveButtonSecondary"),
+  shareImageButton: document.querySelector("#shareImageButton"),
+  viewImageLink: document.querySelector("#viewImageLink"),
   savePreviewImage: document.querySelector("#savePreviewImage"),
   saveImageLink: document.querySelector("#saveImageLink")
 };
@@ -378,9 +380,29 @@ function openSaveSheet() {
   const fileName = `${state.sourceName}-拼豆图纸.png`;
   els.savePreviewImage.src = dataUrl;
   els.saveImageLink.href = dataUrl;
+  els.viewImageLink.href = dataUrl;
   els.saveImageLink.download = fileName;
   els.saveSheet.hidden = false;
   document.body.classList.add("modal-open");
+}
+
+async function shareImage() {
+  const fileName = `${state.sourceName}-拼豆图纸.png`;
+  const blob = await new Promise((resolve) => els.gridCanvas.toBlob(resolve, "image/png"));
+  if (blob && navigator.share) {
+    const file = new File([blob], fileName, { type: "image/png" });
+    const canShareFiles = !navigator.canShare || navigator.canShare({ files: [file] });
+    if (canShareFiles) {
+      try {
+        await navigator.share({ title: "拼豆图纸", text: "这是我的拼豆图纸", files: [file] });
+        return;
+      } catch (error) {
+        if (error && error.name === "AbortError") return;
+      }
+    }
+  }
+  const popup = window.open(els.savePreviewImage.src, "_blank", "noopener");
+  if (!popup) els.viewImageLink.focus();
 }
 
 function closeSaveSheet() {
@@ -412,6 +434,7 @@ els.downloadCsvButton.addEventListener("click", downloadCsv);
 els.printButton.addEventListener("click", () => window.print());
 els.closeSaveButton.addEventListener("click", closeSaveSheet);
 els.closeSaveButtonSecondary.addEventListener("click", closeSaveSheet);
+els.shareImageButton.addEventListener("click", shareImage);
 els.saveBackdrop.addEventListener("click", closeSaveSheet);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !els.saveSheet.hidden) closeSaveSheet();
