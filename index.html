@@ -69,23 +69,24 @@
 
             <div class="settings-grid">
               <label class="field-label" for="sizeSelect">
-                <span>最长边格数</span>
+                <span>板型 / 图纸尺寸</span>
                 <select id="sizeSelect">
-                  <option value="32">32 格 · 细节少</option>
-                  <option value="48" selected>48 格 · 推荐</option>
-                  <option value="64">64 格 · 细节多</option>
+                  <option value="52" selected>小板 · 52 × 52</option>
+                  <option value="78">中板 · 78 × 78</option>
+                  <option value="104">大板 · 104 × 104</option>
                 </select>
               </label>
               <label class="field-label" for="paletteSelect">
-                <span>拼豆颜色</span>
+                <span>色号数量</span>
                 <select id="paletteSelect">
-                  <option value="12">12 色 · 简洁</option>
-                  <option value="18">18 色 · 平衡</option>
                   <option value="24" selected>24 色 · 推荐</option>
+                  <option value="48">48 色 · 细腻</option>
+                  <option value="96">96 色 · 高还原</option>
+                  <option value="221">221 色 · 全色卡</option>
                 </select>
               </label>
             </div>
-            <p class="setting-tip">颜色越多，画面越细腻，但需要准备的豆子颜色也越多。</p>
+            <p class="setting-tip">板型决定图纸格数；色号越多，画面越细腻，但需要准备的豆子颜色也越多。</p>
 
             <button class="primary-button" id="generateButton" type="button">
               <span>生成拼豆图纸</span><span class="button-arrow">→</span>
