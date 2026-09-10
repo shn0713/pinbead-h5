@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f8f7f2" />
-    <title>拼豆图纸生成器 · H5 原型</title>
+    <title>拼豆图纸生成器</title>
     <link rel="stylesheet" href="./styles.css" />
     <script src="./app.js" defer></script>
   </head>
@@ -15,12 +15,10 @@
           <span class="brand-mark"><i></i><i></i><i></i><i></i></span>
           <span>拼豆图纸生成器</span>
         </a>
-        <span class="prototype-badge">H5 原型</span>
       </header>
 
       <main id="top" class="page-wrap">
         <section class="hero">
-          <div class="eyebrow"><span class="eyebrow-dot"></span> 手机端 · 本地演示</div>
           <h1>把照片，变成<br /><em>可以照着拼的图纸</em></h1>
           <p>上传一张照片，选择尺寸和颜色数量，生成带色号、颗数统计的拼豆图纸。</p>
         </section>
@@ -108,18 +106,14 @@
                 <small id="resultMeta">48 × 48 格</small>
               </div>
               <div class="toolbar-actions">
-                <button class="icon-button" id="downloadPngButton" type="button" title="下载 PNG">↓ <span>PNG</span></button>
-                <button class="icon-button" id="downloadCsvButton" type="button" title="下载颜色清单">↓ <span>清单</span></button>
+                <button class="primary-button toolbar-download-button" id="downloadPngButton" type="button" title="下载完整图片"><span>下载完整图片</span><span class="button-arrow">↓</span></button>
               </div>
             </div>
 
             <div class="canvas-frame" id="canvasFrame">
               <canvas id="gridCanvas" aria-label="拼豆图纸网格预览"></canvas>
             </div>
-            <div class="canvas-tools">
-              <button class="primary-button inline-download-button" id="downloadFullImageCanvasButton" type="button">下载完整图片 <span class="button-arrow">↓</span></button>
-              <span class="canvas-tip">下载的是完整图纸，不是手机屏幕截图。</span>
-            </div>
+            <p class="canvas-tip">下载的是完整图纸，不是手机屏幕截图。</p>
 
             <div class="stats-row">
               <div class="stat-card"><span>总颗数</span><strong id="totalBeads">—</strong></div>
@@ -136,10 +130,6 @@
             </div>
             <div class="legend-list" id="legendList"></div>
 
-            <div class="result-footer-actions">
-              <button class="secondary-button" id="printButton" type="button">导出 PDF / 分页打印</button>
-              <span>会按 A4 页面自动拆分，打印窗口中选择“保存为 PDF”即可</span>
-            </div>
           </article>
         </section>
 
@@ -149,9 +139,9 @@
             <h2>从照片到拼豆，只需要几秒</h2>
           </div>
           <div class="steps-grid">
-            <div class="step-card"><span>01</span><strong>上传照片</strong><p>选一张清晰、主体明确的图片。</p></div>
-            <div class="step-card"><span>02</span><strong>选择参数</strong><p>决定图纸大小和颜色数量。</p></div>
-            <div class="step-card"><span>03</span><strong>开始拼豆</strong><p>照着色号摆放，完成后熨烫定型。</p></div>
+            <div class="step-card"><span>01</span><strong>上传照片</strong><p>选择一张需要制作的照片。</p></div>
+            <div class="step-card"><span>02</span><strong>选择参数</strong><p>设置拼豆板型和色号数量。</p></div>
+            <div class="step-card"><span>03</span><strong>下载图片</strong><p>保存完整图纸到手机。</p></div>
           </div>
         </section>
       </main>
@@ -176,37 +166,7 @@
         </section>
       </div>
 
-      <div class="zoom-sheet" id="zoomSheet" hidden>
-        <div class="save-backdrop" id="zoomBackdrop"></div>
-        <section class="save-dialog zoom-dialog" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
-          <button class="save-close" id="closeZoomButton" type="button" aria-label="关闭局部放大">×</button>
-          <span class="section-kicker">查看细节</span>
-          <h2 id="zoomTitle">局部放大</h2>
-          <p>点击主图任意格子，或选择查看范围，放大这一块的色号。</p>
-          <div class="zoom-controls">
-            <label class="field-label" for="zoomRangeSelect">
-              <span>查看范围</span>
-              <select id="zoomRangeSelect">
-                <option value="9">9 × 9 格</option>
-                <option value="13" selected>13 × 13 格</option>
-                <option value="17">17 × 17 格</option>
-              </select>
-            </label>
-            <span class="zoom-info" id="zoomInfo">第 1 行 · 第 1 列</span>
-          </div>
-          <div class="zoom-image-frame">
-            <canvas id="zoomCanvas" aria-label="拼豆图纸局部放大预览"></canvas>
-          </div>
-          <div class="save-actions zoom-actions">
-            <button class="primary-button" id="downloadZoomButton" type="button">保存局部 PNG <span class="button-arrow">↓</span></button>
-            <button class="secondary-button" id="closeZoomButtonSecondary" type="button">返回图纸</button>
-          </div>
-        </section>
-      </div>
-
-      <footer class="site-footer">拼豆图纸生成器 · 产品原型预览</footer>
+      <footer class="site-footer">拼豆图纸生成器</footer>
     </div>
-
-    <div class="print-sheet" id="printSheet" aria-hidden="true"></div>
   </body>
 </html>
