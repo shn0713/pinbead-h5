@@ -213,8 +213,9 @@ button { cursor: pointer; }
 .save-close:hover { color: var(--ink); background: var(--accent-soft); }
 .save-image-frame { max-height: min(57vh, 520px); overflow: auto; padding: 8px; border: 1px solid var(--line); border-radius: 14px; background: #f5f5ef; text-align: center; }
 .save-image-frame img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
-.save-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 16px; }
+.save-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: center; margin-top: 16px; }
 .save-link { display: flex; align-items: center; justify-content: space-between; text-decoration: none; }
+.view-link { display: flex; align-items: center; justify-content: center; text-decoration: none; }
 body.modal-open { overflow: hidden; }
 
 .how-it-works { display: flex; align-items: flex-start; justify-content: space-between; gap: 34px; padding: 100px 0 88px; }
