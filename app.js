@@ -65,9 +65,6 @@ const els = {
   legendTotal: document.querySelector("#legendTotal"),
   legendList: document.querySelector("#legendList"),
   downloadPngButton: document.querySelector("#downloadPngButton"),
-  downloadCsvButton: document.querySelector("#downloadCsvButton"),
-  printButton: document.querySelector("#printButton"),
-  downloadFullImageCanvasButton: document.querySelector("#downloadFullImageCanvasButton"),
   saveSheet: document.querySelector("#saveSheet"),
   saveBackdrop: document.querySelector("#saveBackdrop"),
   closeSaveButton: document.querySelector("#closeSaveButton"),
@@ -76,16 +73,7 @@ const els = {
   viewImageLink: document.querySelector("#viewImageLink"),
   savePreviewImage: document.querySelector("#savePreviewImage"),
   downloadFullImageButton: document.querySelector("#downloadFullImageButton"),
-  saveStatus: document.querySelector("#saveStatus"),
-  zoomSheet: document.querySelector("#zoomSheet"),
-  zoomBackdrop: document.querySelector("#zoomBackdrop"),
-  closeZoomButton: document.querySelector("#closeZoomButton"),
-  closeZoomButtonSecondary: document.querySelector("#closeZoomButtonSecondary"),
-  zoomRangeSelect: document.querySelector("#zoomRangeSelect"),
-  zoomInfo: document.querySelector("#zoomInfo"),
-  zoomCanvas: document.querySelector("#zoomCanvas"),
-  downloadZoomButton: document.querySelector("#downloadZoomButton"),
-  printSheet: document.querySelector("#printSheet")
+  saveStatus: document.querySelector("#saveStatus")
 };
 
 function hexToRgb(hex) {
@@ -633,26 +621,13 @@ els.sizeSelect.addEventListener("change", generate);
 els.paletteSelect.addEventListener("change", generate);
 els.downloadPngButton.addEventListener("click", openSaveSheet);
 els.downloadFullImageButton.addEventListener("click", downloadFullPng);
-els.downloadCsvButton.addEventListener("click", downloadCsv);
-els.printButton.addEventListener("click", printPages);
-els.downloadFullImageCanvasButton.addEventListener("click", () => downloadFullPng(els.downloadFullImageCanvasButton));
-els.zoomRangeSelect.addEventListener("change", (event) => {
-  state.zoomRange = Number(event.target.value);
-  drawZoomPreview();
-});
-els.downloadZoomButton.addEventListener("click", downloadZoomPng);
-els.closeZoomButton.addEventListener("click", closeZoomSheet);
-els.closeZoomButtonSecondary.addEventListener("click", closeZoomSheet);
-els.zoomBackdrop.addEventListener("click", closeZoomSheet);
 els.closeSaveButton.addEventListener("click", closeSaveSheet);
 els.closeSaveButtonSecondary.addEventListener("click", closeSaveSheet);
 els.shareImageButton.addEventListener("click", shareImage);
 els.saveBackdrop.addEventListener("click", closeSaveSheet);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !els.saveSheet.hidden) closeSaveSheet();
-  if (event.key === "Escape" && !els.zoomSheet.hidden) closeZoomSheet();
 });
-window.addEventListener("afterprint", clearPrintMode);
 
 ["dragenter", "dragover"].forEach((eventName) => els.dropzone.addEventListener(eventName, (event) => {
   event.preventDefault();
