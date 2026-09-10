@@ -62,7 +62,13 @@ const els = {
   legendList: document.querySelector("#legendList"),
   downloadPngButton: document.querySelector("#downloadPngButton"),
   downloadCsvButton: document.querySelector("#downloadCsvButton"),
-  printButton: document.querySelector("#printButton")
+  printButton: document.querySelector("#printButton"),
+  saveSheet: document.querySelector("#saveSheet"),
+  saveBackdrop: document.querySelector("#saveBackdrop"),
+  closeSaveButton: document.querySelector("#closeSaveButton"),
+  closeSaveButtonSecondary: document.querySelector("#closeSaveButtonSecondary"),
+  savePreviewImage: document.querySelector("#savePreviewImage"),
+  saveImageLink: document.querySelector("#saveImageLink")
 };
 
 function hexToRgb(hex) {
@@ -264,7 +270,8 @@ function drawGrid() {
   canvas.width = state.gridWidth * cellSize;
   canvas.height = state.gridHeight * cellSize;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = "700 7px Arial, sans-serif";
+  const codeFontSize = state.gridWidth >= 104 ? 5 : state.gridWidth >= 78 ? 6 : 7;
+  context.font = `700 ${codeFontSize}px Arial, sans-serif`;
   context.textAlign = "center";
   context.textBaseline = "middle";
 
@@ -276,7 +283,7 @@ function drawGrid() {
       context.strokeStyle = "rgba(35, 50, 41, 0.16)";
       context.lineWidth = 0.7;
       context.strokeRect(x * cellSize + 0.25, y * cellSize + 0.25, cellSize - 0.5, cellSize - 0.5);
-      if (state.gridWidth <= 52 && state.gridHeight <= 52 && state.paletteCount <= 48) {
+      if (state.gridWidth <= 104 && state.gridHeight <= 104) {
         const luminance = color.rgb.r * 0.299 + color.rgb.g * 0.587 + color.rgb.b * 0.114;
         context.fillStyle = luminance < 145 ? "rgba(255,255,255,0.88)" : "rgba(28,36,32,0.72)";
         context.fillText(color.code, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2 + 0.5);
@@ -366,10 +373,20 @@ function downloadBlob(blob, fileName) {
   setTimeout(() => URL.revokeObjectURL(url), 500);
 }
 
-function downloadPng() {
-  els.gridCanvas.toBlob((blob) => {
-    if (blob) downloadBlob(blob, `${state.sourceName}-拼豆图纸.png`);
-  }, "image/png");
+function openSaveSheet() {
+  const dataUrl = els.gridCanvas.toDataURL("image/png");
+  const fileName = `${state.sourceName}-拼豆图纸.png`;
+  els.savePreviewImage.src = dataUrl;
+  els.saveImageLink.href = dataUrl;
+  els.saveImageLink.download = fileName;
+  els.saveSheet.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeSaveSheet() {
+  els.saveSheet.hidden = true;
+  els.savePreviewImage.removeAttribute("src");
+  document.body.classList.remove("modal-open");
 }
 
 function downloadCsv() {
@@ -390,9 +407,15 @@ els.useSampleButton.addEventListener("click", resetToSample);
 els.generateButton.addEventListener("click", generate);
 els.sizeSelect.addEventListener("change", generate);
 els.paletteSelect.addEventListener("change", generate);
-els.downloadPngButton.addEventListener("click", downloadPng);
+els.downloadPngButton.addEventListener("click", openSaveSheet);
 els.downloadCsvButton.addEventListener("click", downloadCsv);
 els.printButton.addEventListener("click", () => window.print());
+els.closeSaveButton.addEventListener("click", closeSaveSheet);
+els.closeSaveButtonSecondary.addEventListener("click", closeSaveSheet);
+els.saveBackdrop.addEventListener("click", closeSaveSheet);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !els.saveSheet.hidden) closeSaveSheet();
+});
 
 ["dragenter", "dragover"].forEach((eventName) => els.dropzone.addEventListener(eventName, (event) => {
   event.preventDefault();
