@@ -182,8 +182,9 @@ button { cursor: pointer; }
 
 .canvas-frame { position: relative; overflow: auto; max-height: 620px; padding: 12px; border: 1px solid #dfe5dd; border-radius: 15px; background: #f5f5ef; }
 .canvas-frame { touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch; }
-#gridCanvas { display: block; width: 100%; height: auto; min-width: 380px; image-rendering: pixelated; cursor: zoom-in; }
+#gridCanvas { display: block; width: 100%; height: auto; min-width: 380px; image-rendering: pixelated; }
 .canvas-tools { display: flex; align-items: center; gap: 11px; margin-top: 9px; }
+.canvas-tools .primary-button { width: auto; flex: 0 0 auto; padding: 10px 13px; font-size: 11px; }
 .canvas-tools .canvas-tip { margin: 0; }
 .canvas-tip { margin: 9px 3px 0; color: var(--muted); font-size: 10px; }
 
