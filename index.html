@@ -113,10 +113,13 @@
               </div>
             </div>
 
-            <div class="canvas-frame">
+            <div class="canvas-frame" id="canvasFrame">
               <canvas id="gridCanvas" aria-label="拼豆图纸网格预览"></canvas>
             </div>
-            <p class="canvas-tip">手机上可双指放大查看；每个格子代表 1 颗拼豆。</p>
+            <div class="canvas-tools">
+              <button class="secondary-button" id="magnifyButton" type="button">局部放大</button>
+              <span class="canvas-tip">点击图纸可选择放大位置；每个格子代表 1 颗拼豆。</span>
+            </div>
 
             <div class="stats-row">
               <div class="stat-card"><span>总颗数</span><strong id="totalBeads">—</strong></div>
@@ -134,8 +137,8 @@
             <div class="legend-list" id="legendList"></div>
 
             <div class="result-footer-actions">
-              <button class="secondary-button" id="printButton" type="button">打印 / 保存 PDF</button>
-              <span>当前为演示版，生成过程在浏览器本地完成</span>
+              <button class="secondary-button" id="printButton" type="button">导出 PDF / 分页打印</button>
+              <span>会按 A4 页面自动拆分，打印窗口中选择“保存为 PDF”即可</span>
             </div>
           </article>
         </section>
@@ -172,7 +175,37 @@
         </section>
       </div>
 
+      <div class="zoom-sheet" id="zoomSheet" hidden>
+        <div class="save-backdrop" id="zoomBackdrop"></div>
+        <section class="save-dialog zoom-dialog" role="dialog" aria-modal="true" aria-labelledby="zoomTitle">
+          <button class="save-close" id="closeZoomButton" type="button" aria-label="关闭局部放大">×</button>
+          <span class="section-kicker">查看细节</span>
+          <h2 id="zoomTitle">局部放大</h2>
+          <p>点击主图任意格子，或选择查看范围，放大这一块的色号。</p>
+          <div class="zoom-controls">
+            <label class="field-label" for="zoomRangeSelect">
+              <span>查看范围</span>
+              <select id="zoomRangeSelect">
+                <option value="9">9 × 9 格</option>
+                <option value="13" selected>13 × 13 格</option>
+                <option value="17">17 × 17 格</option>
+              </select>
+            </label>
+            <span class="zoom-info" id="zoomInfo">第 1 行 · 第 1 列</span>
+          </div>
+          <div class="zoom-image-frame">
+            <canvas id="zoomCanvas" aria-label="拼豆图纸局部放大预览"></canvas>
+          </div>
+          <div class="save-actions zoom-actions">
+            <button class="primary-button" id="downloadZoomButton" type="button">保存局部 PNG <span class="button-arrow">↓</span></button>
+            <button class="secondary-button" id="closeZoomButtonSecondary" type="button">返回图纸</button>
+          </div>
+        </section>
+      </div>
+
       <footer class="site-footer">拼豆图纸生成器 · 产品原型预览</footer>
     </div>
+
+    <div class="print-sheet" id="printSheet" aria-hidden="true"></div>
   </body>
 </html>
