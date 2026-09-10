@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#f8f7f2" />
     <title>拼豆图纸生成器</title>
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./mard-palette.js" defer></script>
     <script src="./app.js" defer></script>
   </head>
   <body>
@@ -75,16 +76,16 @@
                 </select>
               </label>
               <label class="field-label" for="paletteSelect">
-                <span>色号数量</span>
+                <span>MARD 色卡</span>
                 <select id="paletteSelect">
-                  <option value="24" selected>24 色 · 推荐</option>
-                  <option value="48">48 色 · 细腻</option>
-                  <option value="96">96 色 · 高还原</option>
-                  <option value="221">221 色 · 全色卡</option>
+                  <option value="24" selected>MARD 24 色 · 入门</option>
+                  <option value="48">MARD 48 色 · 常用</option>
+                  <option value="96">MARD 96 色 · 细腻</option>
+                  <option value="221">MARD 221 色 · 全色卡</option>
                 </select>
               </label>
             </div>
-            <p class="setting-tip">板型决定图纸格数；色号越多，画面越细腻，但需要准备的豆子颜色也越多。</p>
+            <p class="setting-tip">全部使用可购买的 MARD 色号；屏幕颜色为近似值，实物会受批次、光线和熨烫影响。</p>
 
             <button class="primary-button" id="generateButton" type="button">
               <span>生成拼豆图纸</span><span class="button-arrow">→</span>
