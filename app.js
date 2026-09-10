@@ -30,12 +30,12 @@ const state = {
   sourceObjectUrl: null,
   sourceName: "示例图",
   isSample: true,
-  size: 48,
+  size: 52,
   paletteCount: 24,
   palette: [],
   grid: [],
-  gridWidth: 48,
-  gridHeight: 48,
+  gridWidth: 52,
+  gridHeight: 52,
   counts: new Map()
 };
 
@@ -76,8 +76,43 @@ function hexToRgb(hex) {
 
 PALETTE.forEach((color) => { color.rgb = hexToRgb(color.hex); });
 
+function hslToHex(hue, saturation, lightness) {
+  const s = saturation / 100;
+  const l = lightness / 100;
+  const chroma = (1 - Math.abs(2 * l - 1)) * s;
+  const segment = hue / 60;
+  const x = chroma * (1 - Math.abs((segment % 2) - 1));
+  const match = l - chroma / 2;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  if (segment < 1) [r, g, b] = [chroma, x, 0];
+  else if (segment < 2) [r, g, b] = [x, chroma, 0];
+  else if (segment < 3) [r, g, b] = [0, chroma, x];
+  else if (segment < 4) [r, g, b] = [0, x, chroma];
+  else if (segment < 5) [r, g, b] = [x, 0, chroma];
+  else [r, g, b] = [chroma, 0, x];
+  return `#${[r, g, b].map((value) => Math.round((value + match) * 255).toString(16).padStart(2, "0")).join("")}`;
+}
+
+function buildFullPalette() {
+  const fullPalette = PALETTE.slice();
+  const additionalColors = 221 - fullPalette.length;
+  for (let index = 0; index < additionalColors; index += 1) {
+    const hue = (index * 137.508) % 360;
+    const saturation = 42 + ((index * 17) % 37);
+    const lightness = 30 + ((index * 29) % 43);
+    const hex = hslToHex(hue, saturation, lightness);
+    const code = `H${String(fullPalette.length + 1).padStart(3, "0")}`;
+    fullPalette.push({ code, name: `扩展色 ${fullPalette.length + 1}`, hex, rgb: hexToRgb(hex) });
+  }
+  return fullPalette;
+}
+
+const FULL_PALETTE = buildFullPalette();
+
 function getPalette(count) {
-  if (count >= PALETTE.length) return PALETTE.slice();
+  if (count >= PALETTE.length) return FULL_PALETTE.slice(0, count);
   const selected = [];
   for (let i = 0; i < count; i += 1) {
     const index = Math.round(i * (PALETTE.length - 1) / (count - 1));
@@ -225,11 +260,11 @@ function calculateCounts() {
 function drawGrid() {
   const canvas = els.gridCanvas;
   const context = canvas.getContext("2d");
-  const cellSize = 30;
+  const cellSize = 24;
   canvas.width = state.gridWidth * cellSize;
   canvas.height = state.gridHeight * cellSize;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = "700 8px Arial, sans-serif";
+  context.font = "700 7px Arial, sans-serif";
   context.textAlign = "center";
   context.textBaseline = "middle";
 
@@ -241,7 +276,7 @@ function drawGrid() {
       context.strokeStyle = "rgba(35, 50, 41, 0.16)";
       context.lineWidth = 0.7;
       context.strokeRect(x * cellSize + 0.25, y * cellSize + 0.25, cellSize - 0.5, cellSize - 0.5);
-      if (state.gridWidth <= 50 && state.gridHeight <= 50) {
+      if (state.gridWidth <= 52 && state.gridHeight <= 52 && state.paletteCount <= 48) {
         const luminance = color.rgb.r * 0.299 + color.rgb.g * 0.587 + color.rgb.b * 0.114;
         context.fillStyle = luminance < 145 ? "rgba(255,255,255,0.88)" : "rgba(28,36,32,0.72)";
         context.fillText(color.code, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2 + 0.5);
