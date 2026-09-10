@@ -203,6 +203,20 @@ button { cursor: pointer; }
 .secondary-button:hover { background: #d3e9da; }
 .result-footer-actions > span { color: var(--muted); font-size: 10px; line-height: 1.4; text-align: right; }
 
+.save-sheet[hidden] { display: none; }
+.save-sheet { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 18px; }
+.save-backdrop { position: absolute; inset: 0; background: rgba(22, 32, 27, 0.52); backdrop-filter: blur(5px); }
+.save-dialog { position: relative; width: min(620px, 100%); max-height: calc(100vh - 36px); overflow: auto; padding: 25px; border: 1px solid rgba(255,255,255,0.7); border-radius: 22px; background: var(--surface); box-shadow: 0 24px 70px rgba(0,0,0,0.25); }
+.save-dialog h2 { margin: 8px 0 7px; font-size: 24px; letter-spacing: -0.05em; }
+.save-dialog > p { margin: 0 0 16px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.save-close { position: absolute; top: 16px; right: 17px; width: 32px; height: 32px; border: 0; border-radius: 50%; color: var(--muted); background: var(--soft); font-size: 24px; line-height: 1; }
+.save-close:hover { color: var(--ink); background: var(--accent-soft); }
+.save-image-frame { max-height: min(57vh, 520px); overflow: auto; padding: 8px; border: 1px solid var(--line); border-radius: 14px; background: #f5f5ef; text-align: center; }
+.save-image-frame img { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+.save-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 16px; }
+.save-link { display: flex; align-items: center; justify-content: space-between; text-decoration: none; }
+body.modal-open { overflow: hidden; }
+
 .how-it-works { display: flex; align-items: flex-start; justify-content: space-between; gap: 34px; padding: 100px 0 88px; }
 .how-it-works h2 { max-width: 230px; margin: 10px 0 0; font-size: 28px; line-height: 1.15; letter-spacing: -0.06em; }
 .steps-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -240,6 +254,8 @@ button { cursor: pointer; }
   .legend-list { grid-template-columns: repeat(2, 1fr); }
   .result-footer-actions { align-items: flex-start; flex-direction: column; }
   .result-footer-actions > span { text-align: left; }
+  .save-dialog { padding: 20px; border-radius: 19px; }
+  .save-actions { grid-template-columns: 1fr; }
   .how-it-works { display: block; padding: 68px 0 58px; }
   .how-it-works h2 { max-width: none; font-size: 25px; }
   .steps-grid { grid-template-columns: 1fr; margin-top: 22px; }
