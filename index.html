@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f8f7f2" />
+    <title>拼豆图纸生成器 · H5 原型</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="拼豆图纸生成器首页">
+          <span class="brand-mark"><i></i><i></i><i></i><i></i></span>
+          <span>拼豆图纸生成器</span>
+        </a>
+        <span class="prototype-badge">H5 原型</span>
+      </header>
+
+      <main id="top" class="page-wrap">
+        <section class="hero">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> 手机端 · 本地演示</div>
+          <h1>把照片，变成<br /><em>可以照着拼的图纸</em></h1>
+          <p>上传一张照片，选择尺寸和颜色数量，生成带色号、颗数统计的拼豆图纸。</p>
+        </section>
+
+        <section class="workspace" aria-label="拼豆图纸生成工作区">
+          <article class="panel setup-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-kicker">01 / 上传照片</span>
+                <h2>先放一张图片</h2>
+              </div>
+              <span class="panel-icon">↗</span>
+            </div>
+
+            <label class="dropzone" id="dropzone" for="imageInput">
+              <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" />
+              <div class="upload-visual">
+                <span class="upload-arrow">↑</span>
+              </div>
+              <strong id="uploadTitle">点击上传照片</strong>
+              <span id="uploadHint">支持 JPG、PNG、WEBP，图片只在本机处理</span>
+              <span class="upload-file" id="fileName">还没有选择图片</span>
+            </label>
+
+            <div class="sample-row">
+              <button class="text-button" id="useSampleButton" type="button">使用示例图</button>
+              <span class="privacy-note"><span>●</span> 不上传原图</span>
+            </div>
+
+            <div class="source-preview" id="sourcePreviewWrap" hidden>
+              <img id="sourcePreview" alt="已选择的原图预览" />
+              <div>
+                <span class="small-label">当前原图</span>
+                <strong id="sourceDimensions">—</strong>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="panel-heading compact-heading">
+              <div>
+                <span class="section-kicker">02 / 生成设置</span>
+                <h2>调整图纸参数</h2>
+              </div>
+            </div>
+
+            <div class="settings-grid">
+              <label class="field-label" for="sizeSelect">
+                <span>最长边格数</span>
+                <select id="sizeSelect">
+                  <option value="32">32 格 · 细节少</option>
+                  <option value="48" selected>48 格 · 推荐</option>
+                  <option value="64">64 格 · 细节多</option>
+                </select>
+              </label>
+              <label class="field-label" for="paletteSelect">
+                <span>拼豆颜色</span>
+                <select id="paletteSelect">
+                  <option value="12">12 色 · 简洁</option>
+                  <option value="18">18 色 · 平衡</option>
+                  <option value="24" selected>24 色 · 推荐</option>
+                </select>
+              </label>
+            </div>
+            <p class="setting-tip">颜色越多，画面越细腻，但需要准备的豆子颜色也越多。</p>
+
+            <button class="primary-button" id="generateButton" type="button">
+              <span>生成拼豆图纸</span><span class="button-arrow">→</span>
+            </button>
+          </article>
+
+          <article class="panel result-panel">
+            <div class="panel-heading result-heading">
+              <div>
+                <span class="section-kicker">03 / 预览结果</span>
+                <h2>你的拼豆图纸</h2>
+              </div>
+              <span class="result-status"><i></i>已生成</span>
+            </div>
+
+            <div class="result-toolbar">
+              <div class="result-summary">
+                <span id="resultName">示例图</span>
+                <small id="resultMeta">48 × 48 格</small>
+              </div>
+              <div class="toolbar-actions">
+                <button class="icon-button" id="downloadPngButton" type="button" title="下载 PNG">↓ <span>PNG</span></button>
+                <button class="icon-button" id="downloadCsvButton" type="button" title="下载颜色清单">↓ <span>清单</span></button>
+              </div>
+            </div>
+
+            <div class="canvas-frame">
+              <canvas id="gridCanvas" aria-label="拼豆图纸网格预览"></canvas>
+            </div>
+            <p class="canvas-tip">手机上可双指放大查看；每个格子代表 1 颗拼豆。</p>
+
+            <div class="stats-row">
+              <div class="stat-card"><span>总颗数</span><strong id="totalBeads">—</strong></div>
+              <div class="stat-card"><span>使用颜色</span><strong id="usedColors">—</strong></div>
+              <div class="stat-card"><span>图纸比例</span><strong id="ratioText">1 : 1</strong></div>
+            </div>
+
+            <div class="legend-heading">
+              <div>
+                <span class="section-kicker">颜色清单</span>
+                <h3>准备这些颜色</h3>
+              </div>
+              <span class="legend-total" id="legendTotal">—</span>
+            </div>
+            <div class="legend-list" id="legendList"></div>
+
+            <div class="result-footer-actions">
+              <button class="secondary-button" id="printButton" type="button">打印 / 保存 PDF</button>
+              <span>当前为演示版，生成过程在浏览器本地完成</span>
+            </div>
+          </article>
+        </section>
+
+        <section class="how-it-works">
+          <div>
+            <span class="section-kicker">简单三步</span>
+            <h2>从照片到拼豆，只需要几秒</h2>
+          </div>
+          <div class="steps-grid">
+            <div class="step-card"><span>01</span><strong>上传照片</strong><p>选一张清晰、主体明确的图片。</p></div>
+            <div class="step-card"><span>02</span><strong>选择参数</strong><p>决定图纸大小和颜色数量。</p></div>
+            <div class="step-card"><span>03</span><strong>开始拼豆</strong><p>照着色号摆放，完成后熨烫定型。</p></div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">拼豆图纸生成器 · 产品原型预览</footer>
+    </div>
+  </body>
+</html>
