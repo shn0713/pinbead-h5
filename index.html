@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#f8f7f2" />
     <title>拼豆图纸生成器</title>
     <link rel="stylesheet" href="./styles.css" />
-    <script src="./mard-palette.js?v=20260910-1" defer></script>
-    <script src="./app.js?v=20260910-1" defer></script>
+    <script src="./mard-palette.js?v=20260910-2" defer></script>
+    <script src="./app.js?v=20260910-2" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -114,7 +114,7 @@
             <div class="canvas-frame" id="canvasFrame">
               <canvas id="gridCanvas" aria-label="拼豆图纸网格预览"></canvas>
             </div>
-            <p class="canvas-tip">下载的是完整图纸，不是手机屏幕截图。</p>
+            <p class="canvas-tip">预览和下载图纸都带四边坐标；下载图片还包含 MARD 色号、每色数量和总量。</p>
 
             <div class="stats-row">
               <div class="stat-card"><span>总颗数</span><strong id="totalBeads">—</strong></div>
@@ -153,7 +153,7 @@
           <button class="save-close" id="closeSaveButton" type="button" aria-label="关闭保存预览">×</button>
           <span class="section-kicker">保存图纸</span>
           <h2 id="saveTitle">长按图片保存</h2>
-          <p>这张是完整尺寸图纸，不是手机截图。普通浏览器点击下载即可；如果在微信等内置浏览器中没有反应，请使用“手机分享 / 保存图片”，或打开新页面后长按大图保存。</p>
+          <p>这张完整施工图包含四边坐标、格内色号、颜色数量和总量。普通浏览器点击下载即可；如果在微信等内置浏览器中没有反应，请使用“手机分享 / 保存图片”，或打开新页面后长按大图保存。</p>
           <div class="save-image-frame">
             <img id="savePreviewImage" alt="可保存的拼豆图纸大图" />
           </div>
